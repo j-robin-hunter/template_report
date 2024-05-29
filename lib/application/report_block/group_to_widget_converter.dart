@@ -72,16 +72,20 @@ class GroupToWidgetConverter {
     }
     return Padding(
       padding: EdgeInsets.only(left: indents * options.indentPixels),
-      child: Text.rich(TextSpan(
-        text: value == '\n' ? '' : value,
-        style: textStyleFromAttributes(group.op.attributes.attrs),
-        children: group.ops.mapIndexed((i, op) {
-          if (i > 0 && i == opsLen && op.isJustNewline()) {
-            return const TextSpan(text: '');
-          }
-          return styledText(op.insert.value, op.attributes.attrs);
-        }).toList(),
-      )),
+      child: Text.rich(
+        TextSpan(
+          text: value == '\n' ? '' : value,
+          style: textStyleFromAttributes(group.op.attributes.attrs),
+          children: group.ops.mapIndexed((i, op) {
+            if (i > 0 && i == opsLen && op.isJustNewline()) {
+              return const WidgetSpan(
+                child: Text(''),
+              );
+            }
+            return styledText(op.insert.value, op.attributes.attrs);
+          }).toList(),
+        ),
+      ),
     );
   }
 
@@ -91,7 +95,9 @@ class GroupToWidgetConverter {
       TextSpan(
         children: ops.mapIndexed((i, op) {
           if (i > 0 && i == opsLen && op.isJustNewline()) {
-            return const TextSpan(text: '');
+            return const WidgetSpan(
+              child: Text(''),
+            );
           }
           return styledText(op.insert.value, op.attributes.attrs);
         }).toList(),
@@ -100,9 +106,20 @@ class GroupToWidgetConverter {
   }
 
   InlineSpan styledText(String text, Map<String, dynamic> attributes) {
-    return TextSpan(
-      text: text,
-      style: textStyleFromAttributes(attributes),
+    double offset = 0;
+    if (attributes.containsKey('script')) {
+      if (attributes['script'] == 'super') {
+        offset = -5;
+      } else {
+        offset = 5;
+      }
+    }
+    return WidgetSpan(
+      alignment: PlaceholderAlignment.middle,
+      child: Transform.translate(
+        offset: Offset(0.0, offset),
+        child: Text(text, style: textStyleFromAttributes(attributes)),
+      ),
     );
   }
 
