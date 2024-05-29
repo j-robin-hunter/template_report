@@ -16,7 +16,7 @@ import 'application/report_block/quill_delta_to_widgets_converter.dart';
 import 'application/templates.dart';
 
 class TemplateReportWidget extends StatelessWidget {
-  final Template template;
+  final Template? template;
   final TextDirection textDirection;
 
   const TemplateReportWidget({
@@ -31,7 +31,7 @@ class TemplateReportWidget extends StatelessWidget {
       textDirection: textDirection,
       child: ListView(
         shrinkWrap: true,
-        children: getReport(template),
+        children: template != null ? getReport(template!) : [],
       ),
     );
   }

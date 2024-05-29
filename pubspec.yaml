@@ -1,6 +1,6 @@
 name: template_report
-description: "A new Flutter package project."
-version: 0.0.1
+description: "A package for creating a Flutter ListView from Quill format data"
+version: 0.0.3
 
 environment:
   sdk: '>=3.1.2 <4.0.0'
@@ -9,8 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  intl: any
-  flutter_quill: ^9.3.11
+  intl: ^0.19.0
+  flutter_quill: ^9.3.20
   collection: ^1.18.0
   sprintf: ^7.0.0
 

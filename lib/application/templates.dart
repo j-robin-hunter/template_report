@@ -11,37 +11,14 @@
 
 import 'package:flutter_quill/quill_delta.dart';
 
-class Templates {
-  List<String>? allTemplateNames;
-  List<Template>? templates;
-
-  Templates({
-    this.allTemplateNames,
-    this.templates,
-  });
-
-  factory Templates.fromJson(Map<String, dynamic> json) {
-    List<Template> templates = [];
-    for (var template in json['templates']) {
-      templates.add(Template.fromJson(template));
-    }
-    return Templates(
-      allTemplateNames: json['allTemplateNames'].isEmpty ? [] : json['allTemplateNames'].cast<String>(),
-      templates: templates,
-    );
-  }
-}
-
 class Template {
-  String? id;
-  String? clientId;
   String? name;
+  String? description;
   Delta? delta;
 
   Template({
-    this.id,
-    this.clientId,
     this.name,
+    this.description,
     delta,
   }) {
     this.delta = delta ?? Delta.fromOperations([Operation.insert('\n')]);
@@ -68,17 +45,16 @@ class Template {
       operations.add(Operation.insert(operation['data'], attrMap));
     }
     return Template(
-      id: json['id'] as String?,
-      clientId: json['clientId'] as String?,
       name: json['name'] as String?,
+      description: json['description'] as String?,
       delta: Delta.fromOperations(operations),
     );
   }
 
   String toGraphQL() => '''
-  template: {
-    clientId: "$clientId"
-    name: $name
+  {
+    name: "$name"
+    description: ${description != null ? '"$description"' : null}
     delta: [${deltaToGraphQL()}]
   }
   ''';
