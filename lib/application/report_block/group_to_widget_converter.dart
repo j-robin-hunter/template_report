@@ -106,6 +106,9 @@ class GroupToWidgetConverter {
   }
 
   InlineSpan styledText(String text, Map<String, dynamic> attributes) {
+    if (text == '\n') {
+      return const TextSpan(text: '\n');
+    }
     double offset = 0;
     if (attributes.containsKey('script')) {
       if (attributes['script'] == 'super') {
