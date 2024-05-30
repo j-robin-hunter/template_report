@@ -6,6 +6,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [0.0.4] - 2024-05-30
 
-- Fix: #0001
+- Fix: #1
 
 
