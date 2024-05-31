@@ -62,7 +62,7 @@ class Template {
   String deltaToGraphQL() {
     String graphql = '';
     for (final operation in delta?.operations ?? []) {
-      graphql = '$graphql{data: "${operation.data.replaceAll('{{', '[[').replaceAll('}}', ']]').replaceAll('\n', '\\\\n')}"';
+      graphql = '$graphql{data: "${operation.data.replaceAll('{{', '[[').replaceAll('}}', ']]').replaceAll('"', "'").replaceAll('\n', '\\\\n')}"';
       if (operation.attributes != null) {
         graphql = '$graphql attributes: "${operation.attributes.toString().replaceAll('{', '').replaceAll('}','').replaceAll(' ', '')}"';
       }

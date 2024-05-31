@@ -1,6 +1,6 @@
 name: template_report
 description: "A package for creating a Flutter ListView from Quill format data"
-version: 0.0.4
+version: 0.0.5
 
 environment:
   sdk: '>=3.1.2 <4.0.0'
