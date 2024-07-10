@@ -17,10 +17,12 @@ import 'application/templates.dart';
 
 class TemplateReportWidget extends StatelessWidget {
   final Template? template;
+  final Map<String, Widget> extensionWidgets;
   final TextDirection textDirection;
 
   const TemplateReportWidget({
     required this.template,
+    required this.extensionWidgets,
     this.textDirection = TextDirection.ltr,
     super.key,
   });
@@ -38,10 +40,11 @@ class TemplateReportWidget extends StatelessWidget {
 
   List<Widget> getReport(Template template) {
     QuillDeltaToWidgetsConverter converter = QuillDeltaToWidgetsConverter(
-      List.castFrom(template.delta!.toJson()),
+      template.delta!.toJson(),
       ConverterOptions(
         converterOptions: OpConverterOptions(
           indentPixels: 40,
+          widgets: extensionWidgets,
         ),
         sanitizerOptions: OpAttributeSanitizerOptions(
           allow8DigitHexColors: true,

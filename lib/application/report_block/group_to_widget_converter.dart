@@ -6,17 +6,24 @@
  * or via any medium without the express written permission
  * and license from the owner
  */
+import 'dart:convert';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:sprintf/sprintf.dart';
+import 'package:template_report/application/report_block/insert_data.dart';
 import 'delta_insert_op.dart';
 import 'grouper/group_types.dart';
 
 class OpConverterOptions {
   double indentPixels;
+  double fontSize;
+  Map<String, Widget> widgets;
 
   OpConverterOptions({
     this.indentPixels = 20,
+    this.fontSize = 14,
+    this.widgets = const {},
   });
 }
 
@@ -77,7 +84,9 @@ class GroupToWidgetConverter {
           text: value == '\n' ? '' : value,
           style: textStyleFromAttributes(group.op.attributes.attrs),
           children: group.ops.mapIndexed((i, op) {
-            if (i > 0 && i == opsLen && op.isJustNewline()) {
+            if (op.insert.runtimeType == InsertDataCustom) {
+              return customInsertOperation(op);
+            } else if (i > 0 && i == opsLen && op.isJustNewline()) {
               return const WidgetSpan(
                 child: Text(''),
               );
@@ -94,7 +103,9 @@ class GroupToWidgetConverter {
     return Text.rich(
       TextSpan(
         children: ops.mapIndexed((i, op) {
-          if (i > 0 && i == opsLen && op.isJustNewline()) {
+          if (op.insert.runtimeType == InsertDataCustom) {
+            return customInsertOperation(op);
+          } else if (i > 0 && i == opsLen && op.isJustNewline()) {
             return const WidgetSpan(
               child: Text(''),
             );
@@ -127,7 +138,9 @@ class GroupToWidgetConverter {
   }
 
   TextStyle textStyleFromAttributes(Map<String, dynamic> attributes) {
-    TextStyle textStyle = const TextStyle();
+    TextStyle textStyle = TextStyle(
+      fontSize: options.fontSize,
+    );
     for (final attribute in attributes.keys) {
       switch (attribute) {
         case 'color':
@@ -176,6 +189,21 @@ class GroupToWidgetConverter {
       }
     }
     return textStyle;
+  }
+
+  InlineSpan customInsertOperation(DeltaInsertOp op) {
+    Map data = jsonDecode(op.insert.value);
+    if (data.containsKey('widget')) {
+      return WidgetSpan(
+        child: options.widgets[data['widget']] ?? Text('Widget ${data['widget']} placeholder'),
+      );
+    }
+    return const WidgetSpan(
+      child: Text(
+        'Unknown custom insert',
+        style: TextStyle(color: Colors.redAccent),
+      ),
+    );
   }
 }
 
