@@ -8,6 +8,8 @@
 // and license from the owner
 //
 // ************************************************************
+import 'dart:convert';
+import 'package:yaml/yaml.dart';
 import 'package:flutter_quill/quill_delta.dart';
 
 class Template {
@@ -43,16 +45,20 @@ class Template {
           }
         }
       }
-      if (operation['data'].contains('custom:')) {
-        // Extract the custom embed from the saved data and create an Operation from it
-        RegExp regExp = RegExp(r'\{[^{]*(?=})');
-        Match? match = regExp.firstMatch(operation['data']);
-        if (match != null) {
-          operations.add(Operation.insert({"custom": match[0]!.replaceAll("'", '"')}, attrMap));
-        } else {
-          operations.add(Operation.insert(operation['data'], attrMap));
-        }
-      } else {
+
+      // Use try/catch to decode data.
+      try {
+        YamlMap yamlMap = loadYaml(operation['data'].replaceAll(':', ': ').replaceAll(RegExp(r'</?x>'), ''));
+        //operations.add(Operation.insert({"custom": '{"${yamlMap['custom'].keys.first}": "\\"${yamlMap['custom'].values.first}\\""}'}, attrMap));
+        print({"custom": '{"${yamlMap['custom'].keys.first}": "\\"${yamlMap['custom'].values.first}\\""}'});
+        String data = operation['data'].replaceAll(RegExp(r'</?x>'), '');
+        data = data.replaceAll(RegExp(r'\s'), '');
+        data = data.replaceAll(RegExp(r'[{}]'), '');
+        data = data.replaceAll('\'', '\\"');
+        List parts = data.split(':');
+        print({"${parts[0]}":'{"${parts[1]}":"\\\\"${parts[2]}\\\\""}'});
+        operations.add(Operation.insert({"${parts[0]}":'{"${parts[1]}":"${parts[2]}"}'}, attrMap));
+      } catch(e) {
         operations.add(Operation.insert(operation['data'], attrMap));
       }
     }
@@ -77,15 +83,20 @@ class Template {
     String graphql = '';
     for (final operation in delta?.operations ?? []) {
       if (operation.data.runtimeType == String) {
-        graphql = '$graphql{data: "${operation.data.replaceAll('"', "'").replaceAll('\n', '\\\\n')}"';
+        graphql = '$graphql{data: "${operation.data.replaceAll('"', "'").replaceAll('\n', r'\\n')}"';
       } else {
-        // Add inside <x></x>, which Deepl should be configured to ignore for translation
-        graphql = '$graphql{data: "<x>${operation.data.toString().replaceAll('"', "'")}</x>"';
+        try {
+          final Map custom = jsonDecode(operation.data['custom']);
+          final List entries = custom.entries.toList();
+          graphql = '$graphql{data:"<x>{custom:{${entries.first.key}:${entries.first.value.replaceAll('"', "'")}}}</x>"';
+        } catch (e) {
+          // Do nothing
+        }
       }
       if (operation.attributes != null) {
         graphql = '$graphql attributes: "${operation.attributes.toString().replaceAll('{', '').replaceAll('}', '').replaceAll(' ', '')}"';
       }
-      graphql = '$graphql}';
+      graphql = graphql.isNotEmpty ? '$graphql}' : '';
     }
     return graphql;
   }

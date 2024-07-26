@@ -10,9 +10,10 @@ dependencies:
   flutter:
     sdk: flutter
   intl: ^0.19.0
-  flutter_quill: ^9.3.20
+  flutter_quill: ^10.0.2
   collection: ^1.18.0
   sprintf: ^7.0.0
+  yaml: ^3.1.2
 
 dev_dependencies:
   flutter_test:
